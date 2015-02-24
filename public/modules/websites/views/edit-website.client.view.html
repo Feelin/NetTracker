@@ -1,0 +1,35 @@
+<section data-ng-controller="WebsitesController" data-ng-init="findOne()">
+	<div class="page-header">
+		<h1>Edit Website</h1>
+	</div>
+	<div class="col-md-12">
+		<form name="websiteForm" class="form-horizontal" data-ng-submit="update(websiteForm.$valid)" novalidate>
+			<fieldset>
+				<div class="form-group" ng-class="{ 'has-error' : submitted && websiteForm.title.$invalid}">
+					<label class="control-label" for="title">Title</label>
+					<div class="controls">
+						<input name="title" type="text" data-ng-model="website.title" id="title" class="form-control" placeholder="Title" required>
+					</div>
+					<div ng-show="submitted && websiteForm.title.$invalid" class="help-block">
+						<p ng-show="websiteForm.title.$error.required" class="text-danger">Title is required</p>
+					</div>
+				</div>
+				<div class="form-group" ng-class="{ 'has-error' : submitted && websiteForm.URL.$invalid}">
+					<label class="control-label" for="URL">URL</label>
+					<div class="controls">
+						<textarea name="URL" data-ng-model="website.URL" id="URL" class="form-control" cols="30" rows="10" placeholder="URL" required></textarea>
+					</div>
+					<div ng-show="submitted && websiteForm.URL.$invalid" class="help-block">
+						<p ng-show="websiteForm.URL.$error.required" class="text-danger">URL is required</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<input type="submit" value="Update" class="btn btn-default">
+				</div>
+				<div data-ng-show="error" class="text-danger">
+					<strong data-ng-bind="error"></strong>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</section>

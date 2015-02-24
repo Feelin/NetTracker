@@ -1,0 +1,21 @@
+<section data-ng-controller="WebsitesController" data-ng-init="find()">
+	<div class="page-header">
+		<h1>我的网站</h1>
+	</div>
+	<div class="list-group">
+		<a data-ng-repeat="website in websites" data-ng-href="#!/websites/{{website._id}}" class="list-group-item">
+			<small class="list-group-item-text">
+				Posted on
+				<span data-ng-bind="website.created | date:'mediumDate'"></span>
+				by
+				<span data-ng-bind="website.user.displayName"></span>
+			</small>
+			<h4 class="list-group-item-heading" data-ng-bind="website.title"></h4>
+			<p class="list-group-item-text" data-ng-bind="website.URL"></p>
+			<p class="list-group-item-text" data-ng-bind="website._id"></p>
+		</a>
+	</div>
+	<div class="alert alert-warning text-center" data-ng-if="websites.$resolved && !websites.length">
+		你还没有添加要分析的网站, 现在 <a href="/#!/websites/create">添加一个</a>?
+	</div>
+</section>

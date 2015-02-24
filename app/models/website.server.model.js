@@ -7,9 +7,9 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
 /**
- * Article Schema
+ * website Schema
  */
-var ArticleSchema = new Schema({
+var websiteSchema = new Schema({
 	created: {
 		type: Date,
 		default: Date.now
@@ -20,10 +20,11 @@ var ArticleSchema = new Schema({
 		trim: true,
 		required: 'Title cannot be blank'
 	},
-	content: {
+	URL: {
 		type: String,
 		default: '',
-		trim: true
+		trim: true,
+		required: 'URL cannot be blank'
 	},
 	user: {
 		type: Schema.ObjectId,
@@ -31,4 +32,4 @@ var ArticleSchema = new Schema({
 	}
 });
 
-mongoose.model('Article', ArticleSchema);
+mongoose.model('Website', websiteSchema);

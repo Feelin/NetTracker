@@ -5,113 +5,113 @@
  */
 var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
-	Article = mongoose.model('Article'),
+	Website = mongoose.model('Website'),
 	_ = require('lodash');
 
 /**
- * Create a article
+ * Create a website
  */
 exports.create = function(req, res) {
-	var article = new Article(req.body);
-	article.user = req.user;
-
-	article.save(function(err) {
+	var website = new Website(req.body);
+	website.user = req.user;
+	console.log(website);
+	website.save(function(err) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			res.json(article);
+			res.json(website);
 		}
 	});
 };
 
 /**
- * Show the current article
+ * Show the current website
  */
 exports.read = function(req, res) {
-	res.json(req.article);
+	res.json(req.website);
 };
 
 /**
- * Update a article
+ * Update a website
  */
 exports.update = function(req, res) {
-	var article = req.article;
+	var website = req.website;
 
-	article = _.extend(article, req.body);
+	website = _.extend(website, req.body);
 
-	article.save(function(err) {
+	website.save(function(err) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			res.json(article);
+			res.json(website);
 		}
 	});
 };
 
 /**
- * Delete an article
+ * Delete an website
  */
 exports.delete = function(req, res) {
-	var article = req.article;
+	var website = req.website;
 
-	article.remove(function(err) {
+	website.remove(function(err) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			res.json(article);
+			res.json(website);
 		}
 	});
 };
 
 /**
- * List of Articles
+ * List of website
  */
 exports.list = function(req, res) {
-	Article.find().sort('-created').populate('user', 'displayName').exec(function(err, articles) {
+	Website.find().sort('-created').populate('user', 'displayName').exec(function(err, website) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			res.json(articles);
+			res.json(website);
 		}
 	});
 };
 
 /**
- * Article middleware
+ * website middleware
  */
-exports.articleByID = function(req, res, next, id) {
+exports.getWebsiteByID = function(req, res, next, id) {
 
 	if (!mongoose.Types.ObjectId.isValid(id)) {
 		return res.status(400).send({
-			message: 'Article is invalid'
+			message: 'website is invalid'
 		});
 	}
 
-	Article.findById(id).populate('user', 'displayName').exec(function(err, article) {
+	Website.findById(id).populate('user', 'displayName').exec(function(err, website) {
 		if (err) return next(err);
-		if (!article) {
+		if (!website) {
 			return res.status(404).send({
-  				message: 'Article not found'
+  				message: 'Website not found'
   			});
 		}
-		req.article = article;
+		req.website = website;
 		next();
 	});
 };
 
 /**
- * Article authorization middleware
+ * website authorization middleware
  */
 exports.hasAuthorization = function(req, res, next) {
-	if (req.article.user.id !== req.user.id) {
+	if (req.website.user.id !== req.user.id) {
 		return res.status(403).send({
 			message: 'User is not authorized'
 		});
