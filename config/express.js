@@ -145,6 +145,12 @@ module.exports = function(db) {
 		});
 	});
 
+	app.options('/api', function(req, res){
+	  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+	  res.setHeader('Access-Control-Allow-Credentials', true);
+	  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+	});
+
 	if (process.env.NODE_ENV === 'secure') {
 		// Load SSL key and certificate
 		var privateKey = fs.readFileSync('./config/sslcerts/key.pem', 'utf8');
