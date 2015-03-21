@@ -4,11 +4,20 @@
 angular.module('websites').factory('Websites', ['$resource',
 	function($resource) {
 		return $resource('websites/:websiteId', {
-			articleId: '@_id'
+			websiteId: '@_id'
 		}, {
 			update: {
 				method: 'PUT'
 			}
+		});
+	}
+]);
+
+
+angular.module('websites').factory('Performance', ['$resource',
+	function($resource) {
+		return $resource('api/:websiteId', {
+			appId: '@_id'
 		});
 	}
 ]);

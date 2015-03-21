@@ -3,10 +3,14 @@
 /**
  * Module dependencies.
  */
-var users = require('../../app/controllers/users.server.controller'),
-	api = require('../../app/controllers/api.server.controller');
+var api = require('../../app/controllers/api.server.controller'),
+	preformance = require('../../app/controllers/api.server.controller');
 
 module.exports = function(app) {
+/*	app.route('/api/:appId').get(api.list);*/
 	app.route('/api')
+		.get(api.read)
 		.post(api.create);
+
+	app.param('appId', preformance.getPerformanceByID);
 };

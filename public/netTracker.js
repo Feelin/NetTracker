@@ -5,14 +5,13 @@ for (var i = 0;i < sc.length; i++){
 		var appid = sc[i].src.split('?NetTrackerAppId=')[1];	
 	}	
 }
-console.log(appid);
 
 function AjaxClass()  
 {  
     var XmlHttp = false;  
     try  
     {  
-        XmlHttp = new XMLHttpRequest();        //FireFox专有  
+        XmlHttp = new XMLHttpRequest();       
     }  
     catch(e)  
     {  
@@ -100,9 +99,11 @@ function AjaxClass()
 }  
   
 
-    var Ajax = new AjaxClass();         // 创建AJAX对象  
-    Ajax.Method = "POST";               // 设置请求方式为POST  
-    Ajax.Url = "http://198.199.100.146/:3000/api"            // URL为default.asp  
-    Ajax.Async = true;                  // 是否异步  
-    Ajax.Arg = "appid="+appid;               // POST的参数  
-    Ajax.Send();                        // 发送请求  
+    var Ajax = new AjaxClass();        
+    Ajax.Method = "POST";              
+    Ajax.Url = "http://localhost:3000/api";        
+    Ajax.Async = true;               
+    Ajax.Arg = "appId="+appid
+    + "&timing=" + JSON.stringify(performance.timing);           
+    Ajax.Send();                     
+

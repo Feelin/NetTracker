@@ -19,4 +19,10 @@
 		</em>
 	</small>
 	<p class="lead" data-ng-bind="website.URL"></p>
+	<p class="list-group-item-text" data-ng-bind="website._id"></p>
+	
+	<div ng-repeat="performance in performances">
+	connectEnd: {{performance.timing.connectEnd}}
+	connectStart: {{performance.timing.connectStart}}
+	</div>
 </section>

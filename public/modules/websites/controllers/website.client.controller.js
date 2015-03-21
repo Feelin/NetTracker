@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('websites').controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Websites',
-	function($scope, $stateParams, $location, Authentication, Websites) {
+angular.module('websites').controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Websites','Performance',
+	function($scope, $stateParams, $location, Authentication, Websites,Performance) {
 		$scope.authentication = Authentication;
 
 		$scope.create = function() {
@@ -53,6 +53,11 @@ angular.module('websites').controller('WebsitesController', ['$scope', '$statePa
 			$scope.website = Websites.get({
 				websiteId: $stateParams.websiteId
 			});
+			$scope.performances = Performance.query({
+				appId:$stateParams.websiteId
+			});
+			console.log($scope.performances);
 		};
 	}
 ]);
+
