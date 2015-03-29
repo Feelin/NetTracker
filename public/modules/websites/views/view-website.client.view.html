@@ -22,7 +22,16 @@
 	<p class="list-group-item-text" data-ng-bind="website._id"></p>
 	
 	<div ng-repeat="performance in performances">
-	connectEnd: {{performance.timing.connectEnd}}
-	connectStart: {{performance.timing.connectStart}}
+	url: {{performance.url}} //
+	useragent: {{performance.useragent}} //
+	perceived:{{performance.timing.perceived}} //
+	redirect:{{performance.timing.redirect}} //
+	cache:{{performance.timing.cache}} //
+	dnsLookup:{{performance.timing.dnsLookup}} //
+	tcpConnection:{{performance.timing.tcpConnection}} //
+	roundTriproundTrip:{{performance.timing.roundTrip}} //
+	pageRender:{{performance.timing.pageRender}} //
+	<br>	
+	<br>	
 	</div>
 </section>

@@ -10,10 +10,20 @@ var mongoose = require('mongoose'),
 
 
 exports.create = function(req, res) {
-	var data = req.body;
+	var data = JSON.parse(req.body.data);
 	var performance = new Performance();
-	performance.appId = data.appId;
-	performance.timing = JSON.parse(data.timing);
+	performance.appId = data.id;
+	performance.url = data.url;
+	performance.useragent = data.useragent;
+	performance.timing = {
+		perceived: data.perceivedTime,
+		redirect: data.redirectTime,
+		cache: data.cacheTime,
+		dnsLookup: data.dnsLookupTime,
+		tcpConnection: data.tcpConnectionTime,
+		roundTrip: data.roundTripTime,
+		pageRender: data.pageRenderTime
+	}	
 	performance.save(function(err) {
 		if (err) {
 			return res.status(400).send({
@@ -23,6 +33,7 @@ exports.create = function(req, res) {
 			console.log("performance save success!");
 		}
 	});
+
 };
 
 exports.list = function(req, res) {

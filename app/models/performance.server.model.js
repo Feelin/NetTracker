@@ -15,6 +15,12 @@ var performanceSchema = new Schema({
 		type: String,
 		ref: 'Website'
 	},
+	url:{
+		type: String
+	},
+	useragent:{
+		type: String
+	},
 	timing: {
 		type: Object
 	}
