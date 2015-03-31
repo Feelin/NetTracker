@@ -18,6 +18,12 @@ angular.module('websites').factory('Performance', ['$resource',
 	function($resource) {
 		return $resource('api/:websiteId', {
 			appId: '@_id'
+		},
+		{
+			getArray: {
+				method:"GET", isArray: true
+			}
 		});
 	}
 ]);
+

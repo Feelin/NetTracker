@@ -1,3 +1,4 @@
+
 <section data-ng-controller="WebsitesController" data-ng-init="findOne()">
 	<div class="page-header">
 		<h1 data-ng-bind="website.title"></h1>
@@ -20,10 +21,13 @@
 	</small>
 	<p class="lead" data-ng-bind="website.URL"></p>
 	<p class="list-group-item-text" data-ng-bind="website._id"></p>
+
+	<div linear-chart chart-data="salesData"></div>
 	
 	<div ng-repeat="performance in performances">
 	url: {{performance.url}} //
 	useragent: {{performance.useragent}} //
+
 	perceived:{{performance.timing.perceived}} //
 	redirect:{{performance.timing.redirect}} //
 	cache:{{performance.timing.cache}} //
@@ -31,7 +35,10 @@
 	tcpConnection:{{performance.timing.tcpConnection}} //
 	roundTriproundTrip:{{performance.timing.roundTrip}} //
 	pageRender:{{performance.timing.pageRender}} //
+
+	[ALLTIME]:{{performance.alltime}}
 	<br>	
 	<br>	
 	</div>
 </section>
+

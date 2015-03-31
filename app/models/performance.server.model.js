@@ -23,6 +23,9 @@ var performanceSchema = new Schema({
 	},
 	timing: {
 		type: Object
+	},
+	alltime: {
+		type : Number
 	}
 });
 

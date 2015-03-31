@@ -24,6 +24,10 @@ exports.create = function(req, res) {
 		roundTrip: data.roundTripTime,
 		pageRender: data.pageRenderTime
 	}	
+	performance.alltime = 0;
+	for(var item in performance.timing){
+		performance.alltime += performance.timing[item];
+	}
 	performance.save(function(err) {
 		if (err) {
 			return res.status(400).send({
