@@ -80,15 +80,15 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
     			.attr("height", height + padding.bottom + padding.top);
 
 			scope.performances.$promise.then(function (dataset){
-				var xtime = [],
+				var createdTime = [],
 					alltime = [];
 				angular.forEach(dataset,function (data){
 					alltime.push(data.alltime);
-					xtime.push(new Date(data.created));
+					createdTime.push(new Date(data.created));
 				});
 				
 				var x = d3.scale.ordinal()
-						.domain(xtime)
+						.domain(createdTime)
     					.rangeRoundBands([padding.left, width],0.1);
 					   
 
@@ -99,7 +99,8 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 
 				var yAxis = d3.svg.axis()
 							.scale(yAxisScale)
-							.orient("left");
+							.tickSize(width)
+    						.orient("right");
 
 				var xScale = d3.scale.ordinal()
 							.domain(d3.range(alltime.length))
@@ -111,7 +112,7 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 
 
 				svg.selectAll("rect")
-				   .data(alltime)
+				   .data(alltime)				   
 				   .enter()
 				   .append("rect")
 				   .attr("x", function(d,i){
@@ -149,22 +150,26 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 				 
 					
 				svg.append("g")
-					.attr("class","axis")
-					.attr("transform","translate("+padding.left+","+padding.top+")")
-					.call(yAxis); 
+					.attr("class","y axis")
+					.attr("transform","translate(0,"+ padding.top +")")
+					.classed("minor", true)
+					.call(yAxis)
+				.selectAll("text")
+				    .attr("x", 4)
+				    .attr("dy", -4);
 
 				svg.append("g")
 					.attr("class", "x axis")
 				    .attr("transform", "translate(0,"+ height+")")
 				    .call(d3.svg.axis()
 				        .scale(x)
-				        .tickValues(xtime)
+				        .tickValues(createdTime)
 				        .tickFormat(function (d) {
 				        	return d3.time.format('%H:%M')(d);
 				        })
 				        .orient("bottom")				       		        
 				  	)
-				  	.selectAll("text")
+				.selectAll("text")
 				  	.attr("transform", "rotate(90),translate(10,-"+ xScale.rangeBand()/2 +")")
 				  	.style("text-anchor","start");
 
@@ -183,11 +188,12 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 				    .attr("height", height);
 
 				function brushended() {
-				  if (!d3.event.sourceEvent) return; // only transition after input
-
+				  if (!d3.event.sourceEvent) return; 
 				  var extent = brush.extent();
 					
-				console.log(extent)
+				var x1 = Math.round(extent[0]/xScale.rangeBand())-2;
+				var x2 = Math.round(extent[1]/xScale.rangeBand())-2;
+				console.log(createdTime[x1],createdTime[x2]);
 				//  var extent1 = extent0.map(d3.time.minute.round);
 				
 				  // if empty when rounded, use floor & ceil instead
