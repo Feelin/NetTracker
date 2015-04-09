@@ -1,11 +1,38 @@
-.axis path,
-.axis line{
+
+.axis text {
+  font: 11px sans-serif;
+}
+
+.axis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.axis line {
   fill: none;
-  stroke: black;
+  stroke: #000;
   shape-rendering: crispEdges;
 }
- 
-.axis text {
-  font-family: sans-serif;
-  font-size: 11px;
+
+.grid-background {
+  fill: #ddd;
+}
+
+.grid line,
+.grid path {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.grid .minor.tick line {
+  stroke-opacity: .5;
+}
+
+.brush .extent {
+	fill:#b4eb7c;
+  stroke: #33b332;
+  fill-opacity: .5;
+  shape-rendering: crispEdges;
 }

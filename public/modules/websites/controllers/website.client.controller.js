@@ -66,84 +66,145 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
  app.directive('linearChart', function($window){
 	return{
 		restrict:'EA',
-		template:"<svg width='1200' height='600'></svg>",
+		template:"<svg></svg>",
 		link: function(scope,elem){
 			var d3 = $window.d3;
 			var rawSvg=elem.find('svg');
 			var svg = d3.select(rawSvg[0]);
+			var padding = {left:50,bottom:150,top:20};
+			var width =1200 - padding.left;
+			var height = 500 - padding.bottom;
+			
+
+			svg.attr("width", width + padding.left)
+    			.attr("height", height + padding.bottom + padding.top);
+
 			scope.performances.$promise.then(function (dataset){
-				var alltime = [];
+				var xtime = [],
+					alltime = [];
 				angular.forEach(dataset,function (data){
 					alltime.push(data.alltime);
+					xtime.push(new Date(data.created));
 				});
-				console.log(alltime.length);
-				var xAxisScale = d3.scale.ordinal()
-								.domain(d3.range(alltime.length))
-								.rangeRoundBands([0,1000]);
+				
+				var x = d3.scale.ordinal()
+						.domain(xtime)
+    					.rangeRoundBands([padding.left, width],0.1);
+					   
+
 				var yAxisScale = d3.scale.linear()
 								.domain([0,d3.max(alltime)])
-								.range([500,0]);
+								.range([height - padding.top,0]);
 
-				var xAxis = d3.svg.axis()
-							.scale(xAxisScale)
-							.orient("bottom");		
+
 				var yAxis = d3.svg.axis()
 							.scale(yAxisScale)
 							.orient("left");
 
 				var xScale = d3.scale.ordinal()
 							.domain(d3.range(alltime.length))
-							.rangeRoundBands([0,1000],0.1);
+							.rangeRoundBands([padding.left,width],0.1);
 									
 				var yScale = d3.scale.linear()
 							.domain([0,d3.max(alltime)])
-							.range([0,500]);
+							.range([0,height - padding.top]);
+
 
 				svg.selectAll("rect")
 				   .data(alltime)
 				   .enter()
 				   .append("rect")
 				   .attr("x", function(d,i){
-						return 50 + xScale(i);
+						return xScale(i);
 				   } )
 				   .attr("y",function(d,i){
-						return 50 + 500 - yScale(d) ;
+						return height - yScale(d) ;
 				   })
 				   .attr("width", function(d,i){
 						return xScale.rangeBand();
 				   })
 				   .attr("height",yScale)
-				   .attr("fill","#959595");
+				   .attr("fill","#33b332");
 
 				svg.selectAll("text")
 		            .data(alltime)
 		            .enter().append("text")
 		            .attr("x", function(d,i){
-						return 40 + xScale(i);
+						return xScale(i);
 				   })
 				   .attr("y",function(d,i){
-						return 30 + 500 - yScale(d) ;
+						return height - yScale(d) ;
 				   })
 		            .attr("dx", function(d,i){
-						return xScale.rangeBand()/3;
+						return xScale.rangeBand()/2;
 				   })
 		            .attr("dy", 15)
-					.attr("text-anchor", "begin")
+					.attr("text-anchor", "middle")
 					.attr("font-size", 11)
-					.attr("fill","black")
+					.attr("text-alient", 11)
+					.attr("fill","white")
 		            .text(function(d,i){
 						return d;
 					});
-				   
-				svg.append("g")
-					.attr("class","axis")
-					.attr("transform","translate(50,550)")
-					.call(xAxis);
+				 
 					
 				svg.append("g")
 					.attr("class","axis")
-					.attr("transform","translate(50,50)")
+					.attr("transform","translate("+padding.left+","+padding.top+")")
 					.call(yAxis); 
+
+				svg.append("g")
+					.attr("class", "x axis")
+				    .attr("transform", "translate(0,"+ height+")")
+				    .call(d3.svg.axis()
+				        .scale(x)
+				        .tickValues(xtime)
+				        .tickFormat(function (d) {
+				        	return d3.time.format('%H:%M')(d);
+				        })
+				        .orient("bottom")				       		        
+				  	)
+				  	.selectAll("text")
+				  	.attr("transform", "rotate(90),translate(10,-"+ xScale.rangeBand()/2 +")")
+				  	.style("text-anchor","start");
+
+
+				var brush = d3.svg.brush()
+						    .x(x)
+						    .on("brushend", brushended)
+						    .on("brushstart", brushstart);
+
+				var gBrush = svg.append("g")
+				    .attr("class", "brush")				   
+				    .call(brush)
+				    .call(brush.event);
+
+				gBrush.selectAll("rect")
+				    .attr("height", height);
+
+				function brushended() {
+				  if (!d3.event.sourceEvent) return; // only transition after input
+
+				  var extent = brush.extent();
+					
+				console.log(extent)
+				//  var extent1 = extent0.map(d3.time.minute.round);
+				
+				  // if empty when rounded, use floor & ceil instead
+				/*  if (extent1[0] >= extent1[1]) {
+				    extent1[0] = d3.time.minute.floor(extent0[0]);
+				    extent1[1] = d3.time.minute.ceil(extent0[1]);
+				  }
+*/
+				  d3.select(this).transition()
+				      .call(brush.extent(extent))
+				      .call(brush.event);
+				}
+
+				function brushstart() {
+					brush.clear();
+				}
+
 
 
 			});
