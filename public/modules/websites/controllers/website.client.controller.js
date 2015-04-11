@@ -56,14 +56,14 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 			});			
 			$scope.performances = Performance.getArray({
 				appId:$stateParams.websiteId
-			});					
+			});	
 		};
 
 	}
 ]);
 
 
- app.directive('linearChart', function($window){
+app.directive('dayChart', function($window){
 	return{
 		restrict:'EA',
 		template:"<svg></svg>",
@@ -71,7 +71,7 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 			var d3 = $window.d3;
 			var rawSvg=elem.find('svg');
 			var svg = d3.select(rawSvg[0]);
-			var padding = {left:50,bottom:150,top:20};
+			var padding = {left:50,bottom:50,top:20};
 			var width =1200 - padding.left;
 			var height = 500 - padding.bottom;
 			
@@ -190,7 +190,7 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 					
 				var x1 = Math.round(extent[0]/xScale.rangeBand())-2;
 				var x2 = Math.round(extent[1]/xScale.rangeBand())-2;
-				console.log(createdTime[x1],createdTime[x2]);
+		
 				//  var extent1 = extent0.map(d3.time.minute.round);
 				
 				  // if empty when rounded, use floor & ceil instead
@@ -216,3 +216,181 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 	}
 });
 
+
+app.directive('itemChart', function($window){
+	return{
+		restrict:'EA',
+		template:"<svg></svg>",
+		link: function(scope,elem){
+			var d3 = $window.d3;
+			var rawSvg=elem.find('svg');
+			var svg = d3.select(rawSvg[0]);
+			var padding = {left:50,bottom:50,top:20};
+			var width =1200 - padding.left;
+			var height = 500 - padding.bottom;					
+
+			svg.attr("width", width + padding.left)
+    			.attr("height", height + padding.bottom + padding.top)
+    			.style("background","#f2f2f2");
+    			
+			scope.performances.$promise.then(function (dataset){
+				var stack = d3.layout.stack(),
+					n = Object.keys(dataset[0].timing).length,
+					m = dataset.length,
+					chartData = new Array(n),
+					keys = ['perceived','redirect','cache','roundTrip','dnsLookup','tcpConnection','pageRender'];
+
+				var createdTime = [];
+				angular.forEach(dataset,function (data){
+					createdTime.push(new Date(data.created));
+				});						
+
+				for (var i=0; i < n; i++){
+					chartData[i] = new Array();		
+					var j = 0;			
+					angular.forEach(dataset,function (data){
+						chartData[i].push({x:j,y:data.timing[keys[i]]});
+						j++;						
+					});
+				}
+
+				var layers = stack(chartData),
+					yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
+    				yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
+
+    			var x = d3.scale.ordinal()
+				    .domain(d3.range(m))
+				    .rangeRoundBands([padding.left, width], .08);
+
+				var xAxisScale = d3.scale.ordinal()
+					.domain(createdTime)
+					.rangeRoundBands([padding.left, width],0.08);	
+
+    			var y = d3.scale.linear()
+				    .domain([0, yStackMax])
+				    .range([height, padding.top]);
+
+				var yAxis = d3.svg.axis()
+							.scale(y)
+							.tickSize(width)
+    						.orient("right");
+
+				var color = d3.scale.linear()
+				    .domain([0, n - 1])
+				    .range(["#aad", "#556"]);
+
+				var xAxis = d3.svg.axis()
+				    .scale(xAxisScale)
+				    .tickValues(createdTime)
+			        .tickFormat(function (d) {
+			        	return d3.time.format('%H:%M')(d);
+			        })
+			        .orient("bottom");	
+
+				var layer = svg.selectAll(".layer")
+				    .data(layers)
+				  .enter().append("g")
+				    .attr("class", "layer")
+				    .attr("data-id",function (d, i) { return i;})
+				    .style("fill", function (d, i) { return color(i); });
+
+				var rect = layer.selectAll("rect")
+				    .data(function(d) { return d; })
+				  	.enter().append("rect")				  	
+				    .attr("x", function (d) { return x(d.x); })
+				    .attr("y", height)
+				    .attr("width", x.rangeBand())
+				    .attr("height", 0);
+
+				rect.on("mouseover",function (d){								
+				    	var xPosition = parseFloat(Number(this.getAttribute("x"))+Number(x.rangeBand()/2)),
+				    		yPosition = parseFloat(this.getAttribute("y")),
+				    		tooltip = d3.select("#tooltip"),
+				    		id = this.parentNode.getAttribute("data-id");
+
+				    	tooltip.style("left",xPosition + "px")
+				    		.style("top",yPosition + "px");
+				    	tooltip.select("#item").text(keys[id]);
+				    	tooltip.select("#value").text(d.y+"ms");
+				    	tooltip.classed("hidden",false);
+				    	d3.select(this).attr("fill","#33b332");
+				    })
+				    .on("mouseout",function (d){
+				    	var id = this.parentNode.getAttribute("data-id");
+				    	d3.select("#tooltip").classed("hidden",true);
+				    	d3.select(this)				    		
+				    		.transition()
+				    		.delay(function (d,i){
+				    			return i * 50;
+				    		})
+				    		.duration(250)
+				    		.attr("fill", function (d) { return color(id); });
+				    });
+
+				rect.transition()
+				    .delay(function(d, i) { return i * 10; })
+				    .attr("y", function(d) { return y(d.y0 + d.y); })
+				    .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+
+				svg.append("g")
+				    .attr("class", "x axis")
+				    .attr("transform", "translate(0," + height + ")")
+				    .call(xAxis)
+				  .selectAll("text")
+				  	.attr("transform", "rotate(45),translate(10,0)")
+				  	.style("text-anchor","start");
+
+				svg.append("g")
+					.attr("class","y axis")
+					.classed("minor", true)
+					.call(yAxis)
+				.selectAll("text")
+				    .attr("x", 4)
+				    .attr("dy", -4);
+
+				
+
+
+				d3.selectAll("input").on("change", change);
+
+				var timeout = setTimeout(function() {
+				  d3.select("input[value=\"grouped\"]").property("checked", true).each(change);
+				}, 1000);
+
+				function change() {
+				  clearTimeout(timeout);
+				  if (this.value === "grouped") transitionGrouped();
+				  else transitionStacked();
+				}
+
+				function transitionGrouped() {
+				  y.domain([0, yGroupMax]);
+
+				  rect.transition()
+				      .duration(500)
+				      .delay(function(d, i) { return i * 10; })
+				      .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+				      .attr("width", x.rangeBand() / n)
+				    .transition()
+				      .attr("y", function(d) { return y(d.y); })
+				      .attr("height", function(d) { return height - y(d.y); });
+				}
+
+				function transitionStacked() {
+				  y.domain([0, yStackMax]);
+
+				  rect.transition()
+				      .duration(500)
+				      .delay(function(d, i) { return i * 10; })
+				      .attr("y", function(d) { return y(d.y0 + d.y); })
+				      .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+				    .transition()
+				      .attr("x", function(d) { return x(d.x); })
+				      .attr("width", x.rangeBand());
+				}
+
+				
+			});
+		}
+	}
+});

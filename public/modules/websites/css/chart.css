@@ -35,3 +35,36 @@
   fill-opacity: .5;
   shape-rendering: crispEdges;
 }
+
+.item-box{
+	position: relative;
+}
+#value{
+	color: #b4eb7c;
+}
+#tooltip {
+  position: absolute;
+  width: 150px;
+  height: 60px;
+  background-color: #2f2f2f;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25), 0 0 50px rgba(0,0,0,0.1) inset;
+  border-radius: 5% 5% 5% 5%;
+  text-align: center;
+  padding: 10px;
+  color: #fff;
+}
+#tooltip:before {
+    position: absolute;
+    z-index: -1;
+    content: "";
+    top: 0px;
+    left: 0px;
+    width: 33%;
+    height: 25%;
+    box-shadow: -10px -10px 15px rgba(0,0,0,0.5);
+    -webkit-transform: rotate(7deg) translate(20px,25px) skew(20deg);
+     -moz-transform: rotate(7deg) translate(20px,25px) skew(20deg);
+     -ms-transform: rotate(7deg) translate(20px,25px) skew(20deg);
+     -o-transform: rotate(7deg) translate(20px,25px) skew(20deg);
+     transform: rotate(7deg) translate(20px,25px) skew(20deg);
+}

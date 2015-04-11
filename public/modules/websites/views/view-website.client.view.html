@@ -22,23 +22,20 @@
 	<p class="lead" data-ng-bind="website.URL"></p>
 	<p class="list-group-item-text" data-ng-bind="website._id"></p>
 
-	<div linear-chart chart-data="salesData"></div>
-	
-	<div ng-repeat="performance in performances">
-	url: {{performance.url}} //
-	useragent: {{performance.useragent}} //
+<!-- 	<div day-chart chart-data="performances"></div> -->
 
-	perceived:{{performance.timing.perceived}} //
-	redirect:{{performance.timing.redirect}} //
-	cache:{{performance.timing.cache}} //
-	dnsLookup:{{performance.timing.dnsLookup}} //
-	tcpConnection:{{performance.timing.tcpConnection}} //
-	roundTriproundTrip:{{performance.timing.roundTrip}} //
-	pageRender:{{performance.timing.pageRender}} //
+	<form>
+	  <label><input type="radio" name="mode" value="grouped"> 各项</label>
+	  <label><input type="radio" name="mode" value="stacked" checked> 总和</label>
+	</form>
+	<div class="item-box">
+		<div id="tooltip" class="hidden">
+			<strong id="item"></strong>
+			<p id="value"></p>
+		</div>
+		<div item-chart chart-data="performances" class="itemChart"></div>
 
-	[ALLTIME]:{{performance.alltime}}
-	<br>	
-	<br>	
 	</div>
+
 </section>
 
