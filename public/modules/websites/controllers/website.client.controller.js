@@ -92,24 +92,20 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
     					.rangeRoundBands([padding.left, width],0.1);
 					   
 
-				var yAxisScale = d3.scale.linear()
+				var yScale = d3.scale.linear()
 								.domain([0,d3.max(alltime)])
-								.range([height - padding.top,0]);
-
-
-				var yAxis = d3.svg.axis()
-							.scale(yAxisScale)
-							.tickSize(width)
-    						.orient("right");
+								.range([height,padding.top]);
+				
 
 				var xScale = d3.scale.ordinal()
 							.domain(d3.range(alltime.length))
 							.rangeRoundBands([padding.left,width],0.1);
-									
-				var yScale = d3.scale.linear()
-							.domain([0,d3.max(alltime)])
-							.range([0,height - padding.top]);
 
+				var yAxis = d3.svg.axis()
+							.scale(yScale)
+							.tickSize(width)
+    						.orient("right");
+													
 
 				svg.selectAll("rect")
 				   .data(alltime)				   
@@ -119,12 +115,14 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 						return xScale(i);
 				   } )
 				   .attr("y",function(d,i){
-						return height - yScale(d) ;
+						return yScale(d) ;
 				   })
 				   .attr("width", function(d,i){
 						return xScale.rangeBand();
 				   })
-				   .attr("height",yScale)
+				   .attr("height", function(d,i){
+				   		return height - yScale(d);
+				   })
 				   .attr("fill","#33b332");
 
 				svg.selectAll("text")
@@ -134,7 +132,7 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 						return xScale(i);
 				   })
 				   .attr("y",function(d,i){
-						return height - yScale(d) ;
+						return yScale(d) ;
 				   })
 		            .attr("dx", function(d,i){
 						return xScale.rangeBand()/2;
@@ -151,7 +149,6 @@ app.controller('WebsitesController', ['$scope', '$stateParams', '$location', 'Au
 					
 				svg.append("g")
 					.attr("class","y axis")
-					.attr("transform","translate(0,"+ padding.top +")")
 					.classed("minor", true)
 					.call(yAxis)
 				.selectAll("text")
