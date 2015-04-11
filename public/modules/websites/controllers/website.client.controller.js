@@ -225,7 +225,7 @@ app.directive('itemChart', function($window){
 			var d3 = $window.d3;
 			var rawSvg=elem.find('svg');
 			var svg = d3.select(rawSvg[0]);
-			var padding = {left:50,bottom:50,top:20};
+			var padding = {left:50,bottom:40,top:20};
 			var width =1200 - padding.left;
 			var height = 500 - padding.bottom;					
 
@@ -304,7 +304,7 @@ app.directive('itemChart', function($window){
 
 				rect.on("mouseover",function (d){								
 				    	var xPosition = parseFloat(Number(this.getAttribute("x"))+Number(x.rangeBand()/2)),
-				    		yPosition = parseFloat(this.getAttribute("y")),
+				    		yPosition = parseFloat(Number(this.getAttribute("y"))+Number( y(d.y0) - y(d.y0 + d.y))/2),
 				    		tooltip = d3.select("#tooltip"),
 				    		id = this.parentNode.getAttribute("data-id");
 
@@ -345,7 +345,7 @@ app.directive('itemChart', function($window){
 					.classed("minor", true)
 					.call(yAxis)
 				.selectAll("text")
-				    .attr("x", 4)
+				    .attr("x", 10)
 				    .attr("dy", -4);
 
 				

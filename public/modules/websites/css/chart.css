@@ -52,6 +52,7 @@
   text-align: center;
   padding: 10px;
   color: #fff;
+  pointer-events: none;
 }
 #tooltip:before {
     position: absolute;
