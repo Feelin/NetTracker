@@ -8,13 +8,16 @@ var mongoose = require('mongoose'),
 	Performance = mongoose.model('Performance'),
 	_ = require('lodash');
 
-
 exports.create = function(req, res) {
 	var data = JSON.parse(req.body.data);
 	var performance = new Performance();
 	performance.appId = data.id;
 	performance.url = data.url;
-	performance.useragent = data.useragent;
+	performance.ip = req.headers['x-forwarded-for'] ||
+				    req.connection.remoteAddress ||
+				    req.socket.remoteAddress ||
+				    req.connection.socket.remoteAddress;
+	console.log(performance.ip);
 	performance.timing = {
 		perceived: data.perceivedTime,
 		redirect: data.redirectTime,

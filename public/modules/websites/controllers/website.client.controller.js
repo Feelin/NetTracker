@@ -238,18 +238,36 @@ app.directive('itemChart', function($window){
 					n = Object.keys(dataset[0].timing).length,
 					m = dataset.length,
 					chartData = new Array(n),
+					createdTime = [],
+					daySplit = [],
 					keys = ['perceived','redirect','cache','roundTrip','dnsLookup','tcpConnection','pageRender'];
 
-				var createdTime = [];
 				angular.forEach(dataset,function (data){
 					createdTime.push(new Date(data.created));
-				});						
+				});			
+
+				var dayRound = createdTime.map(d3.time.day.round);
+
+				for(var t=0; t < dayRound.length - 1; t++){
+					if(dayRound[t] < dayRound[t+1]) 
+						daySplit.push({
+							time: dayRound[t],
+							index: t
+						});
+				}
+
+				daySplit.push({index:dayRound.length - 1,time:dayRound[dayRound.length - 1]});
 
 				for (var i=0; i < n; i++){
 					chartData[i] = new Array();		
 					var j = 0;			
 					angular.forEach(dataset,function (data){
-						chartData[i].push({x:j,y:data.timing[keys[i]]});
+						chartData[i].push({
+							x:j,
+							y:data.timing[keys[i]],
+							url:data.url,
+							ip:data.ip
+						});
 						j++;						
 					});
 				}
@@ -294,13 +312,36 @@ app.directive('itemChart', function($window){
 				    .attr("data-id",function (d, i) { return i;})
 				    .style("fill", function (d, i) { return color(i); });
 
+				var dayLine = svg.selectAll("rect")
+				    .data(daySplit)
+				  	.enter().append("rect")				  	
+				    .attr("x", function (d) { return x(d.index) + x.rangeBand() -5;})
+				    .attr("y", 0)
+				    .attr("width", 12)
+				    .attr("height",height)
+				    .attr("fill","#33b332")
+				    .style("opacity","0.3");
+
+				svg.selectAll("text")
+		            .data(daySplit)
+		            .enter().append("text")	
+		            .text(function (d) { return d3.time.format('%d')(d.time)+"日";})
+		            .attr("x", function (d) { return x(d.index)-20;})
+				    .attr("y", 20)
+				    .style("fill","#33b332");
+				    
+
 				var rect = layer.selectAll("rect")
 				    .data(function(d) { return d; })
 				  	.enter().append("rect")				  	
 				    .attr("x", function (d) { return x(d.x); })
 				    .attr("y", height)
 				    .attr("width", x.rangeBand())
-				    .attr("height", 0);
+				    .attr("height", 0)
+				    .attr("data-url",function (d) { return d.url;})
+				    .attr("data-ip",function (d) { return d.ip;});
+
+				
 
 				rect.on("mouseover",function (d){								
 				    	var xPosition = parseFloat(Number(this.getAttribute("x"))+Number(x.rangeBand()/2)),
@@ -312,6 +353,8 @@ app.directive('itemChart', function($window){
 				    		.style("top",yPosition + "px");
 				    	tooltip.select("#item").text(keys[id]);
 				    	tooltip.select("#value").text(d.y+"ms");
+				    	tooltip.select("#url").text(this.getAttribute("data-url"));
+				    	tooltip.select("#ip").text(this.getAttribute("data-ip"));
 				    	tooltip.classed("hidden",false);
 				    	d3.select(this).attr("fill","#33b332");
 				    })
@@ -346,10 +389,7 @@ app.directive('itemChart', function($window){
 					.call(yAxis)
 				.selectAll("text")
 				    .attr("x", 10)
-				    .attr("dy", -4);
-
-				
-
+				    .attr("dy", -4);				
 
 				d3.selectAll("input").on("change", change);
 
@@ -363,30 +403,40 @@ app.directive('itemChart', function($window){
 				  else transitionStacked();
 				}
 
-				function transitionGrouped() {
-				  y.domain([0, yGroupMax]);
+				function refreshYaxis(){
+					d3.select(".y").transition()
+				        .duration(500)
+				        .delay(function(d, i) { return i * 10; })
+				  	    .call(yAxis)
+				  	.selectAll("text")
+					    .attr("x", 10)
+					    .attr("dy", -4);
+				}
 
-				  rect.transition()
-				      .duration(500)
-				      .delay(function(d, i) { return i * 10; })
-				      .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
-				      .attr("width", x.rangeBand() / n)
-				    .transition()
-				      .attr("y", function(d) { return y(d.y); })
-				      .attr("height", function(d) { return height - y(d.y); });
+				function transitionGrouped() {
+				    y.domain([0, yGroupMax]);				    
+					rect.transition()
+				        .duration(500)
+				        .delay(function(d, i) { return i * 10; })
+				        .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+				        .attr("width", x.rangeBand() / n)
+				    	.transition()
+				        .attr("y", function(d) { return y(d.y); })
+				        .attr("height", function(d) { return height - y(d.y); });
+				    refreshYaxis();
 				}
 
 				function transitionStacked() {
-				  y.domain([0, yStackMax]);
-
-				  rect.transition()
-				      .duration(500)
-				      .delay(function(d, i) { return i * 10; })
-				      .attr("y", function(d) { return y(d.y0 + d.y); })
-				      .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-				    .transition()
-				      .attr("x", function(d) { return x(d.x); })
-				      .attr("width", x.rangeBand());
+				  	y.domain([0, yStackMax]);				    
+				  	rect.transition()
+				        .duration(500)
+				        .delay(function(d, i) { return i * 10; })
+				        .attr("y", function(d) { return y(d.y0 + d.y); })
+				        .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+				    	.transition()
+				        .attr("x", function(d) { return x(d.x); })
+				        .attr("width", x.rangeBand());
+				    refreshYaxis();
 				}
 
 				

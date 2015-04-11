@@ -1,4 +1,5 @@
-    var sc=document.getElementsByTagName('script'); 
+;(function netTracker(){
+    var sc = document.getElementsByTagName('script'); 
     var appId = 0;
     for (var i = 0;i < sc.length; i++){ 
         if(sc[i].src.indexOf("netTracker.js")){
@@ -155,3 +156,5 @@ performance.now = (function() {
 
 perfLogger.startTimeLogging(appId,false,true);
 perfLogger.stopTimeLogging(appId);
+
+})();

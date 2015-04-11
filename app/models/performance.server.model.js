@@ -18,7 +18,7 @@ var performanceSchema = new Schema({
 	url:{
 		type: String
 	},
-	useragent:{
+	ip:{
 		type: String
 	},
 	timing: {
@@ -26,7 +26,7 @@ var performanceSchema = new Schema({
 	},
 	alltime: {
 		type : Number
-	}
+	}	
 });
 
 mongoose.model('Performance', performanceSchema);

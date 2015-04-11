@@ -35,24 +35,35 @@
   fill-opacity: .5;
   shape-rendering: crispEdges;
 }
-
+#ip{
+	float: left;
+	color: #ff5500;
+}
 .item-box{
 	position: relative;
 }
+#item{
+	font-weight: bold;
+	float: right;
+}
 #value{
 	color: #b4eb7c;
+	float: left;
 }
 #tooltip {
   position: absolute;
-  width: 150px;
-  height: 60px;
   background-color: #2f2f2f;
   box-shadow: 0 1px 5px rgba(0,0,0,0.25), 0 0 50px rgba(0,0,0,0.1) inset;
   border-radius: 5% 5% 5% 5%;
   text-align: center;
-  padding: 10px;
+  padding: 10px 10px 5px 10px;
   color: #fff;
   pointer-events: none;
+
+  p{
+  	margin: 0;
+  }
+
 }
 #tooltip:before {
     position: absolute;
