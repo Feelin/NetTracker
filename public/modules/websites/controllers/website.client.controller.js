@@ -225,7 +225,7 @@ app.directive('itemChart', function($window){
 			var d3 = $window.d3;
 			var rawSvg=elem.find('svg');
 			var svg = d3.select(rawSvg[0]);
-			var padding = {left:50,bottom:40,top:20};
+			var padding = {left:50,bottom:25,top:20};
 			var width =1200 - padding.left;
 			var height = 500 - padding.bottom;					
 
@@ -233,7 +233,7 @@ app.directive('itemChart', function($window){
     			.attr("height", height + padding.bottom + padding.top)
     			.style("background","#f2f2f2");
     			
-			scope.performances.$promise.then(function (dataset){
+			scope.performances.$promise.then(function (dataset){			
 				var stack = d3.layout.stack(),
 					n = Object.keys(dataset[0].timing).length,
 					m = dataset.length,
@@ -248,15 +248,17 @@ app.directive('itemChart', function($window){
 
 				var dayRound = createdTime.map(d3.time.day.round);
 
-				for(var t=0; t < dayRound.length - 1; t++){
-					if(dayRound[t] < dayRound[t+1]) 
+				console.log(dayRound)
+
+				for(var t=0; t < dayRound.length - 2; t++){
+					if(dayRound[t] > dayRound[t+1]) {
+						console.log(dayRound[t])
 						daySplit.push({
 							time: dayRound[t],
-							index: t
+							index: t + 1
 						});
+					}
 				}
-
-				daySplit.push({index:dayRound.length - 1,time:dayRound[dayRound.length - 1]});
 
 				for (var i=0; i < n; i++){
 					chartData[i] = new Array();		
@@ -278,11 +280,11 @@ app.directive('itemChart', function($window){
 
     			var x = d3.scale.ordinal()
 				    .domain(d3.range(m))
-				    .rangeRoundBands([padding.left, width], .08);
+				    .rangeRoundBands([width,padding.left], .08);
 
 				var xAxisScale = d3.scale.ordinal()
 					.domain(createdTime)
-					.rangeRoundBands([padding.left, width],0.08);	
+					.rangeRoundBands([width,padding.left],0.08);	
 
     			var y = d3.scale.linear()
 				    .domain([0, yStackMax])
@@ -312,24 +314,26 @@ app.directive('itemChart', function($window){
 				    .attr("data-id",function (d, i) { return i;})
 				    .style("fill", function (d, i) { return color(i); });
 
-				var dayLine = svg.selectAll("rect")
-				    .data(daySplit)
-				  	.enter().append("rect")				  	
-				    .attr("x", function (d) { return x(d.index) + x.rangeBand() -5;})
-				    .attr("y", 0)
-				    .attr("width", 12)
-				    .attr("height",height)
-				    .attr("fill","#33b332")
-				    .style("opacity","0.3");
+				if(daySplit.length > 0 ){
+					var dayLine = svg.selectAll("rect")
+					    .data(daySplit)
+					  	.enter().append("rect")				  	
+					    .attr("x", function (d) { return x(d.index) + x.rangeBand() ;})
+					    .attr("y", 0)
+					    .attr("width", 12)
+					    .attr("height",height)
+					    .attr("fill","#33b332")
+					    .attr("class","day-line")
+					    .style("opacity","0.3");
 
-				svg.selectAll("text")
-		            .data(daySplit)
-		            .enter().append("text")	
-		            .text(function (d) { return d3.time.format('%d')(d.time)+"日";})
-		            .attr("x", function (d) { return x(d.index)-20;})
-				    .attr("y", 20)
-				    .style("fill","#33b332");
-				    
+					svg.selectAll("text")
+			            .data(daySplit)
+			            .enter().append("text")	
+			            .text(function (d) { return d3.time.format('%d')(d.time)+"日";})
+			            .attr("x", function (d) { return x(d.index) + x.rangeBand() + 20;})
+					    .attr("y", 20)
+					    .style("fill","#33b332");
+				}
 
 				var rect = layer.selectAll("rect")
 				    .data(function(d) { return d; })

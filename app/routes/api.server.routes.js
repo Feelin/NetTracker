@@ -12,5 +12,8 @@ module.exports = function(app) {
 		.get(api.read)
 		.post(api.create);
 
-	app.param('appId', preformance.getPerformanceByID);
+	app.route('/daily')
+		.get(api.getDaily);
+		
+	/*app.param('appId', preformance.getPerformanceByID);*/
 };

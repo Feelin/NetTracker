@@ -175,3 +175,5 @@ PRD
 
 > * 按天显示平均值
 > * 拖动选择查看范围
+> * use oboe.js
+> * use websocks

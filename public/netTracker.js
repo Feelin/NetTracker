@@ -88,6 +88,9 @@ var perfLogger = function(){
         loggerPool[id].id = id;
         loggerPool[id].startTime =  performance.now();
         loggerPool[id].drawtopage = drawToPage;
+        if(loggerPool[id].perceivedTime > 1000 * 60 * 60 ||loggerPool[id].perceivedTime < 0){
+        	logtoserver = !logtoserver
+        }
         loggerPool[id].logtoserver = logToServer
     },
     
