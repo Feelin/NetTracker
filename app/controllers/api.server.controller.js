@@ -12,7 +12,6 @@ var mongoose = require('mongoose'),
 
 exports.create = function(req, res) {
 	var data = JSON.parse(req.body.data);
-	console.log(data);
 	var performance = new Performance();
 	performance.appId = data.id;
 	performance.url = data.url;
@@ -115,7 +114,6 @@ exports.read = function(req, res) {
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			console.log('performance.length',performance.length)
 			res.json(performance);
 		}
 	});
@@ -137,13 +135,13 @@ exports.read = function(req, res) {
 
 exports.getDaily = function(req, res) {
 	var appId = req.query.appId;
-	Daily.find({appId:appId}).sort('created').exec(function(err, daily) {
+	Daily.find({appId:appId}).sort('-created').exec(function(err, daily) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
-			res.json(daily);
+			res.json({data:daily});
 		}
 	});
 };

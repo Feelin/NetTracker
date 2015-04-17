@@ -4,7 +4,13 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
-
+.day-y.axis path{
+  display: none;
+}
+.day-y.axis line {
+  stroke: #777;
+  stroke-dasharray: 2,2;
+}
 .y.axis path {
   display: none;
 }
