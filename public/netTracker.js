@@ -84,6 +84,7 @@ var perfLogger = function(){
 
     return {        
     startTimeLogging: function(id,drawToPage,logToServer){
+        console.log(logToServer)
         loggerPool[id] = new TestResults();
         loggerPool[id].id = id;
         loggerPool[id].startTime =  performance.now();

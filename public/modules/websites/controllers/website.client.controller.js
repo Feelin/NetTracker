@@ -93,13 +93,14 @@ app.directive('dayChart', function($window){
 					createdTime.push(new Date(data.day) );				
 				});
 
+				//将pv值从右往左累加
 				var pvindex = 0;
-				for(var i = dataset.data.length - 1; i > 0; i--){
-					console.log(dataset.data[i].pv)
-					pvs.push(dataset.data[i].pv + pvs[pvindex]);
+				for(var i = dataset.data.length - 1; i > -1; i--){
+					var temp = dataset.data[i].pv + pvs[pvindex];
+					temp = temp > 50 ? 50 : temp;
+					pvs.push(temp);
 					pvindex++;
-				}			
-				pvs.push(50);
+				}	
 				pvs.reverse();
 
 			 	var x = d3.scale.ordinal()
@@ -200,9 +201,10 @@ app.directive('dayChart', function($window){
 				    .attr('height', height);
 
 				function brushended() {
-				  if (!d3.event.sourceEvent) return; 
-				  var extent = brush.extent();
-					
+				  	if(!d3.event.sourceEvent) return; 
+				  
+				  	var extent = brush.extent();
+					if(extent[0] === extent[1]) return;
 					var x1 = Math.round( extent[0]/xScale.rangeBand())-1;
 					var x2 = Math.round( extent[1]/xScale.rangeBand())-1;		
 
@@ -212,8 +214,8 @@ app.directive('dayChart', function($window){
 					d3.select(this).transition()
 					      .call(brush.extent(extent))
 					      .call(brush.event);
-					console.log(x1,x2)
 					console.log(pvs)
+					console.log(x2+1,x1)
 					scope.resizeDomain(pvs[x2+1],pvs[x1]);
 				}
 
@@ -250,6 +252,10 @@ app.directive('itemChart', function($window){
 					for (var i = begin;i < end;i++){
 						resizedata.push(data[i]);
 					}
+					console.log(begin,end)
+					console.log(resizedata)
+					console.log(new Date(resizedata[0].created))
+
 					refresh(resizedata);
 				};
 
@@ -356,27 +362,29 @@ app.directive('itemChart', function($window){
 					    .attr('data-id',function (d, i) { return i;})
 					    .style('fill', function (d, i) { return color(i); });
 
-				if(daySplit.length > 0 ){
-					var dayLine = svg.selectAll('rect')
-					    .data(daySplit)
-					  	.enter().append('rect')				  	
-					    .attr('x', function (d) { return x(d.index) + x.rangeBand() ;})
-					    .attr('y', 0)
-					    .attr('width', 12)
-					    .attr('height',height)
-					    .attr('fill','#33b332')
-					    .attr('class','day-line')
-					    .style('opacity','0.3');
-
-					svg.selectAll('text')
-			            .data(daySplit)
-			            .enter().append('text')	
-			            .text(function (d) { return d3.time.format('%d')(d.time)+'日';})
-			            .attr('x', function (d) { return x(d.index) + x.rangeBand() + 20;})
-					    .attr('y', 20)
-					    .attr('class','day-line-text')
-					    .style('fill','#33b332');
+				function drawDayLine(){
+					if( daySplit.length > 0 ){			
+						svg.selectAll('.day-line')
+						    .data(daySplit)
+						  	.enter().append('rect')				  	
+						    .attr('x', function (d) { return x(d.index) + x.rangeBand() ;})
+						    .attr('y', 0)
+						    .attr('width', 12)
+						    .attr('height',height)
+						    .attr('fill','#33b332')
+						    .attr('class','day-line')
+						    .style('opacity','0.3');
+						svg.selectAll('.day-line-text')
+				            .data(daySplit)
+				            .enter().append('text')	
+				            .text(function (d) { return d3.time.format('%d')(d.time)+'日';})
+				            .attr('x', function (d) { return x(d.index) + x.rangeBand() + 20;})
+						    .attr('y', 20)
+						    .attr('class','day-line-text')
+						    .style('fill','#33b332');
+					}
 				}
+				drawDayLine();
 
 				var rect = layer.selectAll('rect')
 				    .data(function(d) { return d; });
@@ -425,13 +433,17 @@ app.directive('itemChart', function($window){
 				    .attr('y', function(d) { return y(d.y0 + d.y); })
 				    .attr('height', function(d) { return y(d.y0) - y(d.y0 + d.y); });
 
-				svg.append('g')
-				    .attr('class', 'x axis')
-				    .attr('transform', 'translate(0,' + height + ')')
-				    .call(xAxis)
-				  .selectAll('text')
-				  	.attr('transform', 'rotate(45),translate(10,0)')
-				  	.style('text-anchor','start');
+				function drawXaxis(){
+					svg.append('g')
+					    .attr('class', 'x axis')
+					    .attr('transform', 'translate(0,' + height + ')')
+					    .call(xAxis)
+					  .selectAll('text')
+					  	.attr('transform', 'rotate(45),translate(10,0)')
+					  	.style('text-anchor','start');
+				}
+
+				drawXaxis();
 
 				svg.append('g')
 					.attr('class','y axis')
@@ -447,14 +459,19 @@ app.directive('itemChart', function($window){
 					d3.select('input[value=\'grouped\']').property('checked', true).each(change);
 				}, 1000);
 
-				var refresh = function (newData){						
+				var refresh = function (newData){	
+
 					init(newData);
 					layer.data(layers);
+					
+					d3.selectAll('.day-line').remove();
+					d3.selectAll('.day-line-text').remove();	
+					d3.select('.x').remove();	
+
 					var bars = layer.selectAll('rect')
-					    .data(function(d) { return d; });
-
-					drawRect(bars);
-
+					    .data(function(d) { return d; });					
+					
+					drawRect(bars);		
 					bars.transition()
 						.duration(500)
 						.attr('x', function (d) {
@@ -468,11 +485,13 @@ app.directive('itemChart', function($window){
 				  		.transition()
 				  		.duration(500)
 				  		.attr('x',0)
-				  		.remove();
- 
-				  	refreshYaxis();
-				  	refreshXaxis();
-				  	refreshDayLine();
+				  		.remove();		
+
+				  	drawDayLine();
+
+					refreshYaxis();				  	
+				  	drawXaxis();
+					
 				}
 
 				function change() {
@@ -489,34 +508,6 @@ app.directive('itemChart', function($window){
 				  	.selectAll('text')
 					    .attr('x', 10)
 					    .attr('dy', -4);
-				}
-
-				function refreshXaxis(){
-					d3.select('.x').remove();
-					svg.append('g')
-				    .attr('class', 'x axis')
-				    .attr('transform', 'translate(0,' + height + ')')
-				    .call(xAxis)
-				  .selectAll('text')
-				  	.attr('transform', 'rotate(45),translate(10,0)')
-				  	.style('text-anchor','start');
-
-				}
-
-				function refreshDayLine(){
-					d3.selectAll('.day-line').remove();
-					d3.selectAll('.day-line-text').remove();
-					if(daySplit.length > 0 ){
-						var newDayLine = d3.selectAll('.day-line').data(daySplit);
-						newDayLine.exit()
-					  		.transition()
-					  		.duration(500)
-					  		.attr('x',0)
-					  		.remove();
-					  	newDayLine.transition()
-					  		.duration(500)
-					  		.attr('x', function (d) { return x(d.index) + x.rangeBand() ;});		  	
-					}
 				}
 
 				function transitionGrouped() {
