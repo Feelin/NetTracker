@@ -51,11 +51,7 @@ var dailySchema = new Schema({
 			type: Object,
 			default: 0
 		}
-	},
-	alltime: {
-		type : Number,
-		default: 0
-	}	
+	}
 });
 
 mongoose.model('Daily', dailySchema);

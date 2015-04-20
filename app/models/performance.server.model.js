@@ -22,11 +22,35 @@ var performanceSchema = new Schema({
 		type: String
 	},
 	timing: {
-		type: Object
-	},
-	alltime: {
-		type : Number
-	}	
+		perceived: {
+			type: Object,
+			default: 0
+		},
+		redirect: {
+			type: Object,
+			default: 0
+		},
+		cache: {
+			type: Object,
+			default: 0
+		},
+		dnsLookup:  {
+			type: Object,
+			default: 0
+		},
+		tcpConnection:  {
+			type: Object,
+			default: 0
+		},
+		roundTrip: {
+			type: Object,
+			default: 0
+		},
+		pageRender: {
+			type: Object,
+			default: 0
+		}
+	}
 });
 
 mongoose.model('Performance', performanceSchema);

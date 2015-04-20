@@ -10,6 +10,10 @@ var mongoose = require('mongoose'),
 	_ = require('lodash'),
 	async = require('async');
 
+function dailyPush (oldData,newData,num){
+	return Math.round( (oldData * num + newData)/(num + 1) );
+}
+
 exports.create = function(req, res) {
 	var data = JSON.parse(req.body.data);
 	var performance = new Performance();
@@ -29,16 +33,12 @@ exports.create = function(req, res) {
 		roundTrip: data.roundTripTime,
 		pageRender: data.pageRenderTime
 	}	
-	performance.alltime = 0;
-	for(var item in performance.timing){
-		performance.alltime += performance.timing[item];
-	}
+	
 	var query = { 
 			appId: performance.appId,
-			day: new Date(new Date().toDateString())
+			day: new Date( ( new Date(Date.now() + 8*60*60*1000) ).toDateString())
 		},
-		update = {},
-		dailyAllTime = 0;
+		update = {};
 	async.parallel([
 	    function (callback){
 	    	performance.save();
@@ -47,7 +47,7 @@ exports.create = function(req, res) {
 	    function (callback){
 	    	async.series([function (callback){
 	    		Daily.find(query).exec(function(err, daily) {		
-		    		if(daily.length == 0){
+		    		if(daily.length === 0){
 		    			daily = [{timing:{
 		    				perceived: 0,
 							redirect: 0,
@@ -62,16 +62,12 @@ exports.create = function(req, res) {
 		    		}
 					for(var key in performance.timing){
 						update[key] = dailyPush(daily[0].timing[key],performance.timing[key],daily[0].pv);
-					}
-					for(var key in update){
-						dailyAllTime += update[key];
-					}
+					}					
 					callback(null,null);
 				});
 	    	},function (callback){
 	    		Daily.update(query, {
-							$set: {
-								alltime: dailyAllTime,
+							$set: {								
 								timing: update
 							}, 
 							$inc:{ pv: 1} 
@@ -146,7 +142,5 @@ exports.getDaily = function(req, res) {
 	});
 };
 
-function dailyPush (oldData,newData,num){
-	return Math.round( (oldData * num + newData)/(num + 1) );
-}
+
 
