@@ -86,15 +86,22 @@ app.directive('dayChart', function($window){
 			scope.daily.$promise.then(function (dataset){
 				var createdTime = [],
 					alltime = [],
-					pvs = [0],
-					PVindex = 0;
+					pvs = [0];
+			
 				angular.forEach(dataset.data,function (data){
 					alltime.push(data.timing.perceived);
-					createdTime.push(new Date(data.day) );
-					pvs.push(data.pv + pvs[PVindex]);
-					PVindex++;
+					createdTime.push(new Date(data.day) );				
 				});
-				
+
+				var pvindex = 0;
+				for(var i = dataset.data.length - 1; i > 0; i--){
+					console.log(dataset.data[i].pv)
+					pvs.push(dataset.data[i].pv + pvs[pvindex]);
+					pvindex++;
+				}			
+				pvs.push(50);
+				pvs.reverse();
+
 			 	var x = d3.scale.ordinal()
 						.domain(createdTime)
     					.rangeRoundBands([padding.left, width],0.1);
@@ -196,8 +203,8 @@ app.directive('dayChart', function($window){
 				  if (!d3.event.sourceEvent) return; 
 				  var extent = brush.extent();
 					
-					var x1 = Math.round(extent[0]/xScale.rangeBand())-1;
-					var x2 = Math.round(extent[1]/xScale.rangeBand())-1;		
+					var x1 = Math.round( extent[0]/xScale.rangeBand())-1;
+					var x2 = Math.round( extent[1]/xScale.rangeBand())-1;		
 
 				  	extent[0] = xScale(x1);
 				  	extent[1] = xScale(x2) + xScale.rangeBand();
@@ -205,8 +212,9 @@ app.directive('dayChart', function($window){
 					d3.select(this).transition()
 					      .call(brush.extent(extent))
 					      .call(brush.event);
-
-					scope.resizeDomain(pvs[x1],pvs[x2+1]);
+					console.log(x1,x2)
+					console.log(pvs)
+					scope.resizeDomain(pvs[x2+1],pvs[x1]);
 				}
 
 				function brushstart() {
@@ -227,9 +235,9 @@ app.directive('itemChart', function($window){
 			var d3 = $window.d3;
 			var rawSvg=elem.find('svg');
 			var svg = d3.select(rawSvg[0]);
-			var padding = {left:50,bottom:25,top:20};
+			var padding = {left:50,bottom:50,top:20};
 			var width =1200 - padding.left;
-			var height = 500 - padding.bottom;					
+			var height = 520 - padding.bottom;					
 
 			svg.attr('width', width + padding.left)
     			.attr('height', height + padding.bottom + padding.top)
@@ -239,7 +247,7 @@ app.directive('itemChart', function($window){
 				var refresh = scope.render(data);
 				scope.resizeDomain = function(begin,end){
 					var resizedata = [];
-					for (var i = end;i > begin;i--){
+					for (var i = begin;i < end;i++){
 						resizedata.push(data[i]);
 					}
 					refresh(resizedata);
@@ -332,7 +340,7 @@ app.directive('itemChart', function($window){
 					    .scale(xAxisScale)
 					    .tickValues(createdTime)
 				        .tickFormat(function (d) {
-				        	return d3.time.format('%H:%M')(d);
+				        	return d3.time.format('%H:%M:%S')(d);
 				        })
 				        .orient('bottom');	
 
