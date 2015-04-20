@@ -236,13 +236,13 @@ app.directive('itemChart', function($window){
     			.style('background','#f2f2f2');
 
 			scope.performances.$promise.then(function (data){
-				var oldChart = scope.render(data);
+				var refresh = scope.render(data);
 				scope.resizeDomain = function(begin,end){
 					var resizedata = [];
-					for (var i = begin;i < end;i++){
+					for (var i = end;i > begin;i--){
 						resizedata.push(data[i]);
 					}
-					oldChart.refresh(resizedata);
+					refresh(resizedata);
 				};
 
 			});
@@ -252,7 +252,7 @@ app.directive('itemChart', function($window){
 
 				var stack = d3.layout.stack(),									
 					keys = ['pageRender','redirect','cache','roundTrip','dnsLookup','tcpConnection','perceived'],
-					keys_chinese = ['DOM渲染','HTTP重定向','查询DNS缓存','HTTP应答','DNS查询','TCP连接','感知时间'];
+					keys_chinese = ['DOM渲染','HTTP重定向','查询DNS缓存','HTTP响应','DNS查询','TCP连接','感知时间'];
 				var chartData,
 					daySplit,
 					createdTime,
@@ -267,15 +267,7 @@ app.directive('itemChart', function($window){
 					yStackMax,
 					m,
 					n;
-
-				var api = {
-					data: chartData,
-					refresh: function (newData){						
-						init(newData);
-						redraw();
-					}
-				};
-
+				
 				var init = function (charts){
 					chartData = new Array(n);
 					n = Object.keys(charts[0].timing).length -1;
@@ -288,7 +280,7 @@ app.directive('itemChart', function($window){
 			
 					var dayRound = createdTime.map(d3.time.day.round);
 
-					for(var t=0; t < dayRound.length - 2; t++){
+					for(var t=0; t < dayRound.length - 1; t++){
 						if(dayRound[t] > dayRound[t+1]) {
 							daySplit.push({
 								time: dayRound[t],
@@ -447,7 +439,8 @@ app.directive('itemChart', function($window){
 					d3.select('input[value=\'grouped\']').property('checked', true).each(change);
 				}, 1000);
 
-				var redraw = function(){
+				var refresh = function (newData){						
+					init(newData);
 					layer.data(layers);
 					var bars = layer.selectAll('rect')
 					    .data(function(d) { return d; });
@@ -503,6 +496,8 @@ app.directive('itemChart', function($window){
 				}
 
 				function refreshDayLine(){
+					d3.selectAll('.day-line').remove();
+					d3.selectAll('.day-line-text').remove();
 					if(daySplit.length > 0 ){
 						var newDayLine = d3.selectAll('.day-line').data(daySplit);
 						newDayLine.exit()
@@ -513,10 +508,6 @@ app.directive('itemChart', function($window){
 					  	newDayLine.transition()
 					  		.duration(500)
 					  		.attr('x', function (d) { return x(d.index) + x.rangeBand() ;});		  	
-					}
-					else{
-						d3.selectAll('.day-line').remove();
-						d3.selectAll('.day-line-text').remove();
 					}
 				}
 
@@ -546,7 +537,7 @@ app.directive('itemChart', function($window){
 				    refreshYaxis();
 				}				
 
-				return api;
+				return refresh;
 
 			}//render
 		}
