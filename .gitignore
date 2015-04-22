@@ -60,3 +60,7 @@ mongod
 *.swp
 logs/
 build/
+
+#Mine
+#========
+public/netTracker.js
