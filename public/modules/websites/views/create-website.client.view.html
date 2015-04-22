@@ -1,18 +1,18 @@
 <section data-ng-controller="WebsitesController">
 	<div class="page-header">
-		<h1>New Website</h1>
+		<h1>添加新的监控网站</h1>
 	</div>
 	<div class="col-md-12">
 		<form name="websiteForm" class="form-horizontal" data-ng-submit="create()" novalidate>
 			<fieldset>
 				<div class="form-group" ng-class="{ 'has-error': websiteForm.title.$dirty && websiteForm.title.$invalid }">
-					<label class="control-label" for="title">Title</label>
+					<label class="control-label" for="title">网站名称</label>
 					<div class="controls">
 						<input name="title" type="text" data-ng-model="title" id="title" class="form-control" placeholder="Title" required>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label" for="URL">URL</label>
+					<label class="control-label" for="URL">网站地址</label>
 					<div class="controls">
 						<input name="URL" type="text" data-ng-model="URL" id="URL" class="form-control" placeholder="URL" required>
 					</div>

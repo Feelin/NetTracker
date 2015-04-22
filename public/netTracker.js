@@ -7,7 +7,7 @@
         }   
     }
 var perfLogger = function(){
-    var serverLogURL = "http://localhost:3000/api",
+    var serverLogURL = "http://127.0.0.1:3000/api",
         loggerPool = [],
         _pTime = Date.now() - performance.timing.navigationStart || 0,
         _redirTime = performance.timing.redirectEnd - performance.timing.redirectStart || 0,
